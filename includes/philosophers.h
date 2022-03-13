@@ -16,7 +16,25 @@
 # include <stdio.h>
 # include <unistd.h>
 # include "../libft/libft.h"
-# define LEN_INT 10
+# include <sys/time.h>
+# include <pthread.h>
+# define ARG6		6
+# define EXIST		1
+# define NOT_EXIST	0
 
+typedef struct philo 
+{
+	int	*value;
+	int	num_philo;
+	int	arg6;
+	long time;
+	pthread_mutex_t	*leftFork;
+	pthread_mutex_t	*rightFork;
+}	t_philo;
+
+int		*parse_arg(int argc, char **argv);
+int		*ft_free(t_philo *philo, int *value)''
+t_philo	*ft_init(int *value, int argc);
+long	get_time(void);
 
 #endif

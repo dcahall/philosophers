@@ -12,80 +12,33 @@
 
 #include "philosophers.h"
 
-static int *ft_free(int *value)
+int	*ft_free(t_philo *philo, int *value)
 {
 	if (value)
 		free(value);
-	return (NULL);
-}
 
-static int	check_symbol(int argc, char **argv)
-{
-	int	i;
-	int j;
-
-	j = 0;
-	i = 1;
-	while (i < argc)
-	{
-		while (argv[i][j])
-		{
-			if (!ft_isdigit(argv[i][j]))
-				return (0);
-			j++;
-		}
-		j = 0;
-		i++;
-	}
-	return (1);
-}
-
-static int	*convers_argc_to_int(int argc, char **argv)
-{
-	int	i;
-	int j;
-	int	*value;
-
-	i = 1;
-	j = 0;
-	value = malloc(sizeof(int) * argc - 1);
-	if (!value)
-		return (NULL);
-	while (argv[i])
-	{
-		value[j] = ft_atoi(argv[i]);
-		if (ft_strlen(argv[i]) > LEN_INT)
-			return (ft_free(value));
-		if (value[j] < 0)
-			return (ft_free(value));
-		j++;
-		i++;
-	}
-	return (value);
-}
-
-static int	*parse_arg(int argc, char **argv)
-{
-	if (!check_symbol(argc, argv))
-		return (NULL);
-	else
-		return (convers_argc_to_int(argc, argv));
+	return (NULL); /*сделать нормальной освобождение памяти фило*/
 }
 
 int	main(int argc, char **argv)
 {
 	int	*value;
+	int i = 0;
+	t_philo *philo;
 
 	if (argc != 5 && argc != 6)
 		return (1);
 	value = parse_arg(argc, argv);
 	if (!value)
 		return (1);
-	while (value)
+	philo = ft_init(value, argc);
+	if (!philo)
+		return (1);
+	while (i < value[0])
 	{
-		printf("%d\n", *value);
-		value++;
+		printf("id philo: %d\t current time: %ld\n", philo[i].num_philo, philo[i].time);
+		i++;
 	}
-
+	// for (i = 0; i < argc - 1; i++)
+		// printf("%d\n", value[i]);
 }
-

@@ -10,7 +10,8 @@ HEADER_PATH		=	includes/
 
 LIBFT			=	libft.a
 
-SRCS_LST		=	main.c
+SRCS_LST		=	main.c		parser.c	init.c\
+					get_time.c
 
 SRCS			=	$(addprefix $(SRCS_PATH), $(SRCS_LST))
 
@@ -35,7 +36,7 @@ all			:	$(NAME)
 	
 $(NAME)		:	$(OBJS) $(HEADER)
 	$(MAKE) -C $(LIBFT_PATH)
-	$(CC) $(CFLAGS) $(SRCS) -o $(NAME)
+	$(CC) $(CFLAGS) -L$(LIBFT_PATH) -lft $(SRCS) -o $(NAME)
 
 clean		:
 	$(MAKE) clean -C $(LIBFT_PATH)
