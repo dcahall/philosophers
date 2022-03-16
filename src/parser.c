@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dcahall <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:00:19 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/13 15:00:23 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/16 20:29:34 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,13 @@ static int	check_symbol(int argc, char **argv)
 		while (argv[i][j])
 		{
 			if (!ft_isdigit(argv[i][j]))
-				return (0);
+				return (ERROR);
 			j++;
 		}
 		j = 0;
 		i++;
 	}
-	return (1);
+	return (SUCCESS);
 }
 
 static int	*convers_argc_to_int(int argc, char **argv)
@@ -46,7 +46,10 @@ static int	*convers_argc_to_int(int argc, char **argv)
 	{
 		value[i] = ft_atoi(argv[i + 1]);
 		if (value[i] < 0)
-			return (ft_free(NULL, NULL, value, NULL));
+		{
+			ft_free(NULL, NULL, value, NULL);
+			return (NULL);
+		}
 		i++;
 	}
 	return (value);
@@ -54,7 +57,7 @@ static int	*convers_argc_to_int(int argc, char **argv)
 
 int	*parse_arg(int argc, char **argv)
 {
-	if (!check_symbol(argc, argv))
+	if (check_symbol(argc, argv) == ERROR)
 		return (NULL);
 	else
 		return (convers_argc_to_int(argc, argv));
