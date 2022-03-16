@@ -46,7 +46,7 @@ static int	*convers_argc_to_int(int argc, char **argv)
 	{
 		value[i] = ft_atoi(argv[i + 1]);
 		if (value[i] < 0)
-			return (ft_free(value));
+			return (ft_free(NULL, NULL, value, NULL));
 		i++;
 	}
 	return (value);

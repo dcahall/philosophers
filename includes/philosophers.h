@@ -33,8 +33,8 @@ typedef struct philo
 }	t_philo;
 
 int		*parse_arg(int argc, char **argv);
-int		*ft_free(t_philo *philo, int *value)''
-t_philo	*ft_init(int *value, int argc);
+int		*ft_free(t_philo *philo, pthread_mutex_t *forks ,int *value, pthread_t	*tid);
+int		*ft_init(int *value, int argc);
 long	get_time(void);
 
 #endif
