@@ -11,7 +11,7 @@ HEADER_PATH		=	includes/
 LIBFT			=	libft.a
 
 SRCS_LST		=	main.c		parser.c	init.c\
-					get_time.c	philo_work.c
+					utils.c		philo_work.c
 
 SRCS			=	$(addprefix $(SRCS_PATH), $(SRCS_LST))
 

@@ -6,24 +6,11 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/12 18:28:36 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/16 20:28:02 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/17 13:14:51 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
-
-int	ft_free(t_philo *philo, pthread_mutex_t *forks ,int *value, pthread_t *tid)
-{
-	if (forks)
-		free(forks);
-	if (value)
-		free(value);
-	if (philo)
-		free (philo);
-	if (tid)
-		free (tid);
-	return (ERROR);
-}
 
 int	main(int argc, char **argv)
 {

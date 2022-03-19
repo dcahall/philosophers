@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:00:19 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/16 20:29:34 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/19 16:55:45 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ static int	*convers_argc_to_int(int argc, char **argv)
 		value[i] = ft_atoi(argv[i + 1]);
 		if (value[i] < 0)
 		{
-			ft_free(NULL, NULL, value, NULL);
+			free(value);
 			return (NULL);
 		}
 		i++;
