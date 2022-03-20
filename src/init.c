@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/19 20:26:37 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/20 18:18:43 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ static t_philo	*init_ph(int *value, int argc, t_common *common)
 		return (NULL);
 	while (i < value[0])
 	{
-		philo[i].num_philo = i + 1;
+		philo[i].time_start = get_time();
+		philo[i].last_meal = philo[i].time_start;
+		philo[i].num_philo = i;
 		philo[i].common = common;
 		philo[i].meal_numbers = 0;
 		if (argc == ARG6)
@@ -39,7 +41,7 @@ static void	set_forks(t_philo *philo, pthread_mutex_t *forks, int value)
 {
 	(philo + value)->right_fork = &forks[value];
 	(philo + value)->left_fork = &forks[0];
-	while (value > 0)
+	while (value)
 	{
 		value--;
 		philo[value].right_fork = &forks[value];
@@ -52,8 +54,6 @@ static int	init_mutex(t_common *common)
 	int	i;
 
 	i = 0;
-	if (pthread_mutex_init(common->access_print, NULL))
-		return (ERROR);
 	while (i < common->value[0])
 	{
 		if (pthread_mutex_init((common->all_forks + i), NULL))
@@ -71,13 +71,11 @@ static t_common	*init_common_data(int *value)
 	if (!common)
 		return (NULL);
 	common->value = value;
-	common->access_print = NULL;
 	common->all_forks = NULL;
 	common->all_tid = NULL;
 	common->all_forks = malloc (sizeof(pthread_mutex_t) * value[0]);
-	common->access_print = malloc (sizeof(pthread_mutex_t));
 	common->all_tid = malloc(sizeof(pthread_t) * value[0]);
-	if (!common->all_forks || !common->access_print || !common->all_tid)
+	if (!common->all_forks || !common->all_tid)
 	{
 		ft_free(NULL, common);
 		return (NULL);
@@ -90,6 +88,8 @@ int	ft_init(int *value, int argc)
 	t_philo			*philo;
 	t_common		*common;
 
+	// for( int i = 0; i < argc; i++)
+	// 	printf("value[%d], %d\n", i, value[i]);
 	common = init_common_data(value);
 	if (!common)
 		return (ERROR);

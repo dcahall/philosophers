@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 19:44:56 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/19 20:30:37 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/20 18:25:25 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,10 @@ int	ft_free(t_philo *philo, t_common *common)
 {
 	if (common)
 	{
-		if (common->access_print)
-			free(common->access_print);
 		if (common->all_forks)
 			free(common->all_forks);
 		if (common->all_tid)
-		{
 			free(common->all_tid);
-		}
 		if (common->value)
 			free(common->value);
 		free(common);
@@ -41,7 +37,18 @@ int	ft_free(t_philo *philo, t_common *common)
 	return (ERROR);
 }
 
-void	thread_sleep(philo->common->value[3]);
+void	thread_sleep(t_philo *philo, int action_status)
+{
+	int		millisecond;
+	long	time;
+	if (action_status == SLEEP)
+		millisecond = philo->common->value[3];
+	else
+		millisecond = philo->common->value[2];
+	time = get_time();
+	while (get_time() - time < millisecond)
+		usleep(100);
+}
 
 // int	mutex_destroy(t_philo *philo, int *value)
 // {

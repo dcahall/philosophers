@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 14:01:26 by macuser           #+#    #+#             */
-/*   Updated: 2022/03/19 20:27:38 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/20 17:59:59 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,24 +17,22 @@ static void	ft_print(t_philo *philo, int name_proccess)
 	if (name_proccess == SECOND_FORK || name_proccess == FIRST_FORK)
 	{
 		printf("%ld %d has taken a fork\n", get_time() - \
-			philo->common->time_start, philo->num_philo);
+			philo->time_start, philo->num_philo);
 		if (name_proccess == SECOND_FORK)
 		{
-			printf("%ld %d has taken a fork\n", get_time() - \
-				philo->common->time_start, philo->num_philo);
 			printf("%ld %d is eating\n", get_time() - \
-				philo->common->time_start, philo->num_philo);
+				philo->time_start, philo->num_philo);
 		}
 	}
 	else if (name_proccess == SLEEP)
 		printf("%ld %d is sleeping\n", get_time() - \
-			philo->common->time_start, philo->num_philo);
+			philo->time_start, philo->num_philo);
 	else if (name_proccess == THINK)
 		printf("%ld %d is thinking\n", get_time() - \
-			philo->common->time_start, philo->num_philo);
+			philo->time_start, philo->num_philo);
 	else if (name_proccess == DIED)
 		printf("%ld %d is sleeping\n", get_time() - \
-			philo->common->time_start, philo->num_philo);
+			philo->time_start, philo->num_philo);
 }
 
 static void	lock_unlock_fork(t_philo *philo, int action)
@@ -62,15 +60,14 @@ void	*run_philo(void *tid)
 	philo = (t_philo *)tid;
 
 	i = 1;
-	philo->last_meal = philo->common->time_start;
 	while (i > 0)
 	{
 		ft_print(philo, THINK);
 		lock_unlock_fork(philo, LOCK);
-		thread_sleep(philo->common->value[3]);
-		ft_print(philo, SLEEP);
-		thread_sleep(philo->common->value[4]);
+		thread_sleep(philo, EAT);
 		lock_unlock_fork(philo, UNLOCK);
+		ft_print(philo, SLEEP);
+		thread_sleep(philo, SLEEP);
 	}
 	return (NULL);
 }
@@ -80,15 +77,20 @@ static int pthread_create_wait(t_philo *philo, pthread_t *tid)
 	int	i;
 
 	i = 0;
-	philo->common->time_start = get_time();
+	// tid = NULL;
 	while (i < philo->common->value[0])
 	{
-		if (i % 2 == 0)
-			usleep(100);
+		// printf("%d\n", i);
 		if (pthread_create(&tid[i], NULL, run_philo, (void *)(philo + i)) != 0)
 			return (ERROR);
-		i++;
+		i += 2;
+		if (i >= philo->common->value[0] && i % 2 == 0)
+		{
+			usleep(30);
+			i = 1;
+		}
 	}
+	i = philo->common->value[0];
 	while (i)
 	{
 		i--;

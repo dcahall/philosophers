@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/12 18:20:17 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/19 20:25:40 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/20 17:40:37 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,8 @@
 
 typedef struct common_data
 {
-	long			time_start;
 	int				*value;
 	pthread_mutex_t	*all_forks;
-	pthread_mutex_t	*access_print;
 	pthread_t		*all_tid;
 }	t_common;
 
@@ -46,7 +44,8 @@ typedef struct philo
 	int				num_philo;
 	int				arg6;
 	long			last_meal;
-	int				meal_numbers
+	long			time_start;
+	int				meal_numbers;
 	t_common		*common;	
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
@@ -56,6 +55,7 @@ int		*parse_arg(int argc, char **argv);
 int		ft_init(int *value, int argc);
 
 long	get_time(void);
+void	thread_sleep(t_philo *philo, int action_status);
 int		mutex_destroy(t_philo *philo, int *value);
 int		ft_free(t_philo *philo, t_common *common);
 
