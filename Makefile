@@ -10,8 +10,8 @@ HEADER_PATH		=	includes/
 
 LIBFT			=	libft.a
 
-SRCS_LST		=	main.c		parser.c	init.c\
-					utils.c		philo_work.c
+SRCS_LST		=	main.c		parser.c		init.c\
+					utils.c		philo_work.c	undertaker.c
 
 SRCS			=	$(addprefix $(SRCS_PATH), $(SRCS_LST))
 

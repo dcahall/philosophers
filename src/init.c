@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/20 18:18:43 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/21 20:20:19 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static t_philo	*init_ph(int *value, int argc, t_common *common)
 	{
 		philo[i].time_start = get_time();
 		philo[i].last_meal = philo[i].time_start;
-		philo[i].num_philo = i;
+		philo[i].num_philo = i + 1;
 		philo[i].common = common;
 		philo[i].meal_numbers = 0;
 		if (argc == ARG6)
@@ -57,7 +57,7 @@ static int	init_mutex(t_common *common)
 	while (i < common->value[0])
 	{
 		if (pthread_mutex_init((common->all_forks + i), NULL))
-			return (ERROR);
+			return (error_message("Error pthread_mutex_init (init_mutex)"));
 		i++;
 	}
 	return (SUCCESS);
@@ -73,10 +73,12 @@ static t_common	*init_common_data(int *value)
 	common->value = value;
 	common->all_forks = NULL;
 	common->all_tid = NULL;
+	common->all_alive = YES;
 	common->all_forks = malloc (sizeof(pthread_mutex_t) * value[0]);
 	common->all_tid = malloc(sizeof(pthread_t) * value[0]);
 	if (!common->all_forks || !common->all_tid)
 	{
+		error_message("Error malloc (init_common_data)");
 		ft_free(NULL, common);
 		return (NULL);
 	}
@@ -88,14 +90,15 @@ int	ft_init(int *value, int argc)
 	t_philo			*philo;
 	t_common		*common;
 
-	// for( int i = 0; i < argc; i++)
-	// 	printf("value[%d], %d\n", i, value[i]);
 	common = init_common_data(value);
 	if (!common)
 		return (ERROR);
 	philo = init_ph(value, argc, common);
 	if (!philo)
-		return (ft_free(NULL, common));
+	{
+		ft_free(NULL, common);
+		return (ERROR);
+	}
 	if (init_mutex(common) ==  ERROR)
 	{
 		ft_free(philo, common);

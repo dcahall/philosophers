@@ -6,45 +6,38 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 14:01:26 by macuser           #+#    #+#             */
-/*   Updated: 2022/03/20 17:59:59 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/21 20:46:56 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-static void	ft_print(t_philo *philo, int name_proccess)
-{
-	if (name_proccess == SECOND_FORK || name_proccess == FIRST_FORK)
-	{
-		printf("%ld %d has taken a fork\n", get_time() - \
-			philo->time_start, philo->num_philo);
-		if (name_proccess == SECOND_FORK)
-		{
-			printf("%ld %d is eating\n", get_time() - \
-				philo->time_start, philo->num_philo);
-		}
-	}
-	else if (name_proccess == SLEEP)
-		printf("%ld %d is sleeping\n", get_time() - \
-			philo->time_start, philo->num_philo);
-	else if (name_proccess == THINK)
-		printf("%ld %d is thinking\n", get_time() - \
-			philo->time_start, philo->num_philo);
-	else if (name_proccess == DIED)
-		printf("%ld %d is sleeping\n", get_time() - \
-			philo->time_start, philo->num_philo);
-}
+
+// int	mutex_destroy(t_philo *philo, int *value)
+// {
+// 	int	i;
+
+// 	i = 0;
+// 	while (i < value[0])
+// 	{
+// 		if (pthread_mutex_destroy(philo[i].right_fork))
+// 			return (ERROR);
+// 		i++;
+// 	}
+// 	return (SUCCESS);
+// }
 
 static void	lock_unlock_fork(t_philo *philo, int action)
 {
-	if (action == LOCK)
+	if (action == LOCK && philo->common->all_alive == YES)
 	{
 		pthread_mutex_lock(philo->left_fork);
 		ft_print(philo, FIRST_FORK);
 		pthread_mutex_lock(philo->right_fork);
-		ft_print(philo, SECOND_FORK);
 		if (philo->arg6 == EXIST)
 			philo->meal_numbers += 1;
+		philo->last_meal = get_time();
+		ft_print(philo, SECOND_FORK);
 	}
 	else if (action == UNLOCK)
 	{
@@ -53,14 +46,12 @@ static void	lock_unlock_fork(t_philo *philo, int action)
 	}	
 }
 
-void	*run_philo(void *tid)
+static void	*run_philo(void *thread)
 {
 	t_philo	*philo;
-	int		i;
-	philo = (t_philo *)tid;
+	philo = (t_philo *)thread;
 
-	i = 1;
-	while (i > 0)
+	while (philo->common->all_alive == YES && philo->common->value[0] != 1)
 	{
 		ft_print(philo, THINK);
 		lock_unlock_fork(philo, LOCK);
@@ -75,14 +66,12 @@ void	*run_philo(void *tid)
 static int pthread_create_wait(t_philo *philo, pthread_t *tid)
 {
 	int	i;
-
+	
 	i = 0;
-	// tid = NULL;
 	while (i < philo->common->value[0])
 	{
-		// printf("%d\n", i);
 		if (pthread_create(&tid[i], NULL, run_philo, (void *)(philo + i)) != 0)
-			return (ERROR);
+			return (error_message("Error pthread_create (pthread_create_wait"));
 		i += 2;
 		if (i >= philo->common->value[0] && i % 2 == 0)
 		{
@@ -90,24 +79,21 @@ static int pthread_create_wait(t_philo *philo, pthread_t *tid)
 			i = 1;
 		}
 	}
+	if (ft_undertaker(philo) == ERROR)
+		return (ERROR);
 	i = philo->common->value[0];
-	while (i)
-	{
-		i--;
-		if (pthread_join(philo->common->all_tid[i], NULL) != 0)
-			return (ERROR);
-	}
+	while (i--)
+		if (pthread_join(philo->common->all_tid[i], NULL))
+			return (error_message("Error pthread_join (pthread_create_wait)"));
 	return (SUCCESS);
 }
 
 int	start_philo(t_philo *philo)
 {
-	if (pthread_create_wait(philo, philo->common->all_tid) == ERROR)
-	{
+	int	result;
+
+	result = pthread_create_wait(philo, philo->common->all_tid);
 		// mutex_destroy(philo, value);
-		// return (ft_free(philo, philo->common));
-	}
-	// if (mutex_destroy(philo, value) == ERROR)
-		// return (ERROR);
-	return (SUCCESS);
+		ft_free(philo, philo->common);
+	return (result);
 }

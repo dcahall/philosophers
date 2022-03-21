@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:00:19 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/19 16:55:45 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/21 20:19:05 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,16 @@ static int	*convers_argc_to_int(int argc, char **argv)
 	i = 0;
 	value = malloc(sizeof(int) * argc - 1);
 	if (!value)
+	{
+		error_message("Error malloc (conver_argc_to_int)");
 		return (NULL);
+	}
 	while (argv[i + 1])
 	{
 		value[i] = ft_atoi(argv[i + 1]);
-		if (value[i] < 0)
+		if (value[i] < 0) /*могут ли значения равняться нулю?*/
 		{
+			error_message("Error arg < 0");
 			free(value);
 			return (NULL);
 		}

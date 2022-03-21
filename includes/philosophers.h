@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/12 18:20:17 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/20 17:40:37 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/21 20:30:11 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,9 @@
 # include "../libft/libft.h"
 # include <sys/time.h>
 # include <pthread.h>
-# define ARG6			6
-# define EXIST			1
-# define NOT_EXIST		0
 # define ERROR			1
 # define SUCCESS		0
+# define ARG6			6
 # define FIRST_FORK		10
 # define SECOND_FORK	11
 # define EAT			12
@@ -31,10 +29,15 @@
 # define DIED			15
 # define LOCK			16
 # define UNLOCK			17
+# define EXIST			18
+# define NOT_EXIST		19
+# define YES			20
+# define NO				21
 
 typedef struct common_data
 {
 	int				*value;
+	int				all_alive;
 	pthread_mutex_t	*all_forks;
 	pthread_t		*all_tid;
 }	t_common;
@@ -54,11 +57,13 @@ typedef struct philo
 int		*parse_arg(int argc, char **argv);
 int		ft_init(int *value, int argc);
 
-long	get_time(void);
 void	thread_sleep(t_philo *philo, int action_status);
-int		mutex_destroy(t_philo *philo, int *value);
-int		ft_free(t_philo *philo, t_common *common);
+void	ft_free(t_philo *philo, t_common *common);
+void	ft_print(t_philo *philo, int name_proccess);
+int		error_message(char *message);
+long	get_time(void);
 
 int		start_philo(t_philo *philo);
+int	ft_undertaker(t_philo *all_philo);
 
 #endif
