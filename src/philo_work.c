@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 14:01:26 by macuser           #+#    #+#             */
-/*   Updated: 2022/03/21 20:46:56 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/22 16:29:09 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,16 @@
 
 static void	lock_unlock_fork(t_philo *philo, int action)
 {
-	if (action == LOCK && philo->common->all_alive == YES)
+	if (action == LOCK && philo->common->stop_run == NO) /*Нужно обращаться не к value[4] а к arg6*/
 	{
 		pthread_mutex_lock(philo->left_fork);
-		ft_print(philo, FIRST_FORK);
+		ft_print(philo, FORK);
 		pthread_mutex_lock(philo->right_fork);
-		if (philo->arg6 == EXIST)
-			philo->meal_numbers += 1;
-		philo->last_meal = get_time();
-		ft_print(philo, SECOND_FORK);
+		ft_print(philo, FORK);
+		ft_print(philo, EAT);
+		if (philo->meal_numbers)
+			philo->meal_numbers -= 1;
+		philo->last_meal = get_time() - philo->time_start;
 	}
 	else if (action == UNLOCK)
 	{
@@ -51,7 +52,8 @@ static void	*run_philo(void *thread)
 	t_philo	*philo;
 	philo = (t_philo *)thread;
 
-	while (philo->common->all_alive == YES && philo->common->value[0] != 1)
+	philo->last_meal = 0;
+	while (philo->common->stop_run == NO && philo->common->value[0] != 1)
 	{
 		ft_print(philo, THINK);
 		lock_unlock_fork(philo, LOCK);
@@ -75,7 +77,7 @@ static int pthread_create_wait(t_philo *philo, pthread_t *tid)
 		i += 2;
 		if (i >= philo->common->value[0] && i % 2 == 0)
 		{
-			usleep(30);
+			usleep(50);
 			i = 1;
 		}
 	}

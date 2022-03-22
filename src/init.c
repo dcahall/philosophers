@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/21 20:20:19 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/22 16:28:00 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,15 +23,13 @@ static t_philo	*init_ph(int *value, int argc, t_common *common)
 		return (NULL);
 	while (i < value[0])
 	{
-		philo[i].time_start = get_time();
-		philo[i].last_meal = philo[i].time_start;
 		philo[i].num_philo = i + 1;
 		philo[i].common = common;
-		philo[i].meal_numbers = 0;
+		philo[i].time_start = get_time();
 		if (argc == ARG6)
-			philo[i].arg6 = EXIST;
+			philo[i].meal_numbers = common->value[4];
 		else
-			philo[i].arg6 = NOT_EXIST;
+			philo[i].meal_numbers = NOT_EXIST;
 		i++;
 	}
 	return (philo);
@@ -60,6 +58,8 @@ static int	init_mutex(t_common *common)
 			return (error_message("Error pthread_mutex_init (init_mutex)"));
 		i++;
 	}
+	if (pthread_mutex_init(common->stop_print, NULL))
+		return(error_message("Error pthread_mutex_init (init_mutex)"));
 	return (SUCCESS);
 }
 
@@ -70,13 +70,15 @@ static t_common	*init_common_data(int *value)
 	common = malloc (sizeof(t_common));
 	if (!common)
 		return (NULL);
+	
 	common->value = value;
 	common->all_forks = NULL;
 	common->all_tid = NULL;
-	common->all_alive = YES;
+	common->stop_run = NO;
 	common->all_forks = malloc (sizeof(pthread_mutex_t) * value[0]);
 	common->all_tid = malloc(sizeof(pthread_t) * value[0]);
-	if (!common->all_forks || !common->all_tid)
+	common->stop_print = malloc(sizeof(pthread_mutex_t));
+	if (!common->all_forks || !common->all_tid || ! common->stop_print)
 	{
 		error_message("Error malloc (init_common_data)");
 		ft_free(NULL, common);

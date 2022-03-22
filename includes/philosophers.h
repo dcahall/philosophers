@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/12 18:20:17 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/21 20:30:11 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/22 16:27:52 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,23 +21,22 @@
 # define ERROR			1
 # define SUCCESS		0
 # define ARG6			6
-# define FIRST_FORK		10
-# define SECOND_FORK	11
-# define EAT			12
-# define SLEEP			13
-# define THINK			14
-# define DIED			15
-# define LOCK			16
-# define UNLOCK			17
-# define EXIST			18
-# define NOT_EXIST		19
-# define YES			20
-# define NO				21
+# define FORK			10
+# define EAT			11
+# define SLEEP			12
+# define THINK			13
+# define DIED			14
+# define LOCK			15
+# define UNLOCK			16
+# define NOT_EXIST		17
+# define YES			18
+# define NO				19
 
 typedef struct common_data
 {
 	int				*value;
-	int				all_alive;
+	int				stop_run;
+	pthread_mutex_t	*stop_print;
 	pthread_mutex_t	*all_forks;
 	pthread_t		*all_tid;
 }	t_common;
@@ -45,7 +44,6 @@ typedef struct common_data
 typedef struct philo
 {
 	int				num_philo;
-	int				arg6;
 	long			last_meal;
 	long			time_start;
 	int				meal_numbers;
@@ -64,6 +62,6 @@ int		error_message(char *message);
 long	get_time(void);
 
 int		start_philo(t_philo *philo);
-int	ft_undertaker(t_philo *all_philo);
+int		ft_undertaker(t_philo *all_philo);
 
 #endif

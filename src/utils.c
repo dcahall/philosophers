@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 19:44:56 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/21 19:50:42 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/22 16:20:25 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,40 +25,41 @@ void	thread_sleep(t_philo *philo, int action_status)
 	int		millisecond;
 	long	time;
 
-	if (philo->common->all_alive == NO)
-		return ;
 	if (action_status == SLEEP)
 		millisecond = philo->common->value[3];
 	else
 		millisecond = philo->common->value[2];
 	time = get_time();
-	while (get_time() - time < millisecond)
-		usleep(100);
+	while (get_time() - time < millisecond && philo->common->stop_run == NO)
+		usleep(10);
 }
 
 void	ft_print(t_philo *philo, int name_proccess)
 {
-	if (philo->common->all_alive == NO)
+	long	time;
+
+	pthread_mutex_lock(philo->common->stop_print);
+	if (philo->common->stop_run == YES)
+	{	
+		pthread_mutex_unlock(philo->common->stop_print);
 		return ;
-	if (name_proccess == SECOND_FORK || name_proccess == FIRST_FORK)
-	{
-		printf("%ld %d has taken a fork\n", get_time() - \
-			philo->time_start, philo->num_philo);
-		if (name_proccess == SECOND_FORK)
-		{
-			printf("%ld %d is eating\n", get_time() - \
-				philo->time_start, philo->num_philo);
-		}
 	}
+	time = get_time();
+	printf("%ld %d ", time - philo->time_start, philo->num_philo);
+	if (name_proccess == FORK)
+		printf("has taken a fork\n");
+	if (name_proccess == EAT)
+		printf("is eating\n");
 	else if (name_proccess == SLEEP)
-		printf("%ld %d is sleeping\n", get_time() - \
-			philo->time_start, philo->num_philo);
+		printf("is sleeping\n");
 	else if (name_proccess == THINK)
-		printf("%ld %d is thinking\n", get_time() - \
-			philo->time_start, philo->num_philo);
+		printf("is thinking\n");
 	else if (name_proccess == DIED)
-		printf("%ld %d is died\n", get_time() - \
-			philo->time_start, philo->num_philo);
+	{
+		philo->common->stop_run = YES;
+		printf("is died\n");
+	}
+	pthread_mutex_unlock(philo->common->stop_print);
 }
 
 void	ft_free(t_philo *philo, t_common *common)
@@ -71,6 +72,8 @@ void	ft_free(t_philo *philo, t_common *common)
 			free(common->all_tid);
 		if (common->value)
 			free(common->value);
+		if (common->stop_print)
+			free(common->stop_print);
 		free(common);
 	}
 	if (philo)
