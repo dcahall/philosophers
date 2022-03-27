@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 19:44:56 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/22 16:20:25 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/27 20:56:29 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,15 @@ long	get_time(void)
 	struct timeval	current_time;
 
 	gettimeofday(&current_time, NULL);
-	return (current_time.tv_sec * 1e3 + current_time.tv_usec * 1e-3);
+	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
 }
 
-void	thread_sleep(t_philo *philo, int action_status)
+void	thread_sleep(t_philo *philo, long millisecond)
 {
-	int		millisecond;
 	long	time;
 
-	if (action_status == SLEEP)
-		millisecond = philo->common->value[3];
-	else
-		millisecond = philo->common->value[2];
-	time = get_time();
-	while (get_time() - time < millisecond && philo->common->stop_run == NO)
+	time = get_time() + millisecond;
+	while (time > get_time() && philo->value[1] != STOP_RUN)
 		usleep(10);
 }
 
@@ -38,10 +33,10 @@ void	ft_print(t_philo *philo, int name_proccess)
 {
 	long	time;
 
-	pthread_mutex_lock(philo->common->stop_print);
-	if (philo->common->stop_run == YES)
+	pthread_mutex_lock(philo->print);
+	if (philo->value[1] == STOP_RUN)
 	{	
-		pthread_mutex_unlock(philo->common->stop_print);
+		pthread_mutex_unlock(philo->print);
 		return ;
 	}
 	time = get_time();
@@ -56,32 +51,28 @@ void	ft_print(t_philo *philo, int name_proccess)
 		printf("is thinking\n");
 	else if (name_proccess == DIED)
 	{
-		philo->common->stop_run = YES;
+		philo->value[1] = STOP_RUN;
 		printf("is died\n");
 	}
-	pthread_mutex_unlock(philo->common->stop_print);
+	pthread_mutex_unlock(philo->print);
 }
 
-void	ft_free(t_philo *philo, t_common *common)
+void	ft_free(t_philo *philo, pthread_t *tid)
 {
-	if (common)
-	{
-		if (common->all_forks)
-			free(common->all_forks);
-		if (common->all_tid)
-			free(common->all_tid);
-		if (common->value)
-			free(common->value);
-		if (common->stop_print)
-			free(common->stop_print);
-		free(common);
-	}
 	if (philo)
-		free(philo);
+	{
+		if (philo->print)
+			free(philo->print);
+		if (philo->left_fork)
+			free(philo->left_fork);
+			free(philo);
+	}
+	if (tid)
+		free(tid);
 }
 
 int	error_message(char *message)
 {
 	ft_putendl_fd(message, 2);
-	return (ERROR);
+	return (EXIT_FAILURE);
 }

@@ -6,28 +6,32 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/22 16:28:00 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/27 21:03:23 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-static t_philo	*init_ph(int *value, int argc, t_common *common)
+static t_philo	*init_ph(int *value, int argc, pthread_mutex_t *print)
 {
 	t_philo			*philo;
 	int				i;
 
 	i = 0;
-	philo = malloc(sizeof(t_philo) * value[0]);
+	philo = (t_philo *) malloc(sizeof(t_philo) * value[0]);
 	if (!philo)
+	{
+		free(print);
 		return (NULL);
+	}
 	while (i < value[0])
 	{
+		philo[i].value = value;
+		philo[i].print = print;
 		philo[i].num_philo = i + 1;
-		philo[i].common = common;
-		philo[i].time_start = get_time();
+		philo[i].time_start = 0;
 		if (argc == ARG6)
-			philo[i].meal_numbers = common->value[4];
+			philo[i].meal_numbers = value[4];
 		else
 			philo[i].meal_numbers = NOT_EXIST;
 		i++;
@@ -35,79 +39,103 @@ static t_philo	*init_ph(int *value, int argc, t_common *common)
 	return (philo);
 }
 
-static void	set_forks(t_philo *philo, pthread_mutex_t *forks, int value)
+static int	set_forks(t_philo *philo, int value)
 {
+	pthread_mutex_t	*forks;
+
+	forks = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t) * value);
+	if (!forks)
+		return (EXIT_FAILURE);
 	(philo + value)->right_fork = &forks[value];
 	(philo + value)->left_fork = &forks[0];
-	while (value)
+	if (pthread_mutex_init((forks + value), NULL))
+		return (error_message("Error pthread_mutex_init"));
+	if (pthread_mutex_init((philo->print), NULL))
+		return (error_message("Error pthread_mutex_init"));
+	while (value--)
 	{
-		value--;
 		philo[value].right_fork = &forks[value];
 		philo[value].left_fork = &forks[value + 1];
+		if (pthread_mutex_init((forks + value), NULL))
+			return (error_message("Error pthread_mutex_init"));
 	}
+	return (EXIT_SUCCESS);
 }
 
-static int	init_mutex(t_common *common)
+static int create_threads(t_philo *philo, pthread_t *tid, int *value)
 {
 	int	i;
 
 	i = 0;
-	while (i < common->value[0])
+	while (i < value[0])
 	{
-		if (pthread_mutex_init((common->all_forks + i), NULL))
-			return (error_message("Error pthread_mutex_init (init_mutex)"));
+		if (pthread_create((tid + i), NULL, run_philo, (void *)(philo + i)) != 0)
+			return (error_message("Error pthread_create"));
+		i += 2;
+		if (i >= value[0] && i % 2 == 0)
+		{
+			usleep(50);
+			i = 1;
+		}
+	}
+	// if (pthread_create((tid + value[0]), NULL, ft_undertaker, (void *) philo))
+	// 	return (error_message("Error pthread_create"));
+	return (EXIT_SUCCESS);
+}
+
+static int	wait_threads(pthread_t *tid, int *value)
+{
+	int	i;
+
+	i = 0;
+	// while (i <= value[0])
+	while (i < value[0])
+	{
+		if (pthread_join(tid[i], NULL))
+			return (error_message("Error pthread_join (pthread_create_wait)"));
 		i++;
 	}
-	if (pthread_mutex_init(common->stop_print, NULL))
-		return(error_message("Error pthread_mutex_init (init_mutex)"));
-	return (SUCCESS);
+	return (EXIT_SUCCESS);
 }
 
-static t_common	*init_common_data(int *value)
+static int	start_philo(t_philo *philo, int *value)
 {
-	t_common		*common;
+	pthread_t	*tid;
 
-	common = malloc (sizeof(t_common));
-	if (!common)
-		return (NULL);
-	
-	common->value = value;
-	common->all_forks = NULL;
-	common->all_tid = NULL;
-	common->stop_run = NO;
-	common->all_forks = malloc (sizeof(pthread_mutex_t) * value[0]);
-	common->all_tid = malloc(sizeof(pthread_t) * value[0]);
-	common->stop_print = malloc(sizeof(pthread_mutex_t));
-	if (!common->all_forks || !common->all_tid || ! common->stop_print)
+	tid = (pthread_t *) malloc(sizeof(pthread_t) * (value[0] + 1));
+	if (!tid)
+		ft_free(philo, NULL);
+	if (create_threads(philo, tid, value) ==  EXIT_FAILURE)
 	{
-		error_message("Error malloc (init_common_data)");
-		ft_free(NULL, common);
-		return (NULL);
+		ft_free(philo, tid);
+		return (EXIT_FAILURE);
 	}
-	return (common);
+	if (wait_threads(tid, value) == EXIT_FAILURE)
+	{
+		ft_free(philo, tid);
+		return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
 }
+
 
 int	ft_init(int *value, int argc)
 {
 	t_philo			*philo;
-	t_common		*common;
-
-	common = init_common_data(value);
-	if (!common)
-		return (ERROR);
-	philo = init_ph(value, argc, common);
+	pthread_mutex_t *print;
+	
+	print = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+	if (!print)
+		return (EXIT_FAILURE);
+	philo = init_ph(value, argc, print);
 	if (!philo)
+		return (EXIT_FAILURE);
+	if (set_forks(philo, value[0]) ==  EXIT_FAILURE)
 	{
-		ft_free(NULL, common);
-		return (ERROR);
+		ft_free(philo, NULL);
+		return (EXIT_FAILURE);
 	}
-	if (init_mutex(common) ==  ERROR)
-	{
-		ft_free(philo, common);
-		return (ERROR);
-	}
-	set_forks(philo, common->all_forks, value[0] - 1);
-	if (start_philo(philo) == ERROR)
-		return (ERROR);
-	return (SUCCESS);
+	if (start_philo(philo, value) == EXIT_FAILURE)
+		return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
 }
