@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/12 18:20:17 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/27 19:03:27 by dcahall          ###   ########.fr       */
+/*   Created: 2022/03/28 20:10:00 by dcahall           #+#    #+#             */
+/*   Updated: 2022/03/29 14:24:48 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,21 +38,23 @@ typedef struct philo
 	long			last_meal;
 	long			time_start;
 	int				meal_numbers;
-	pthread_mutex_t	*print;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
+	pthread_mutex_t	*print;
 }	t_philo;
 
 int		*parse_arg(int argc, char **argv);
 int		ft_init(int *value, int argc);
 
-void	thread_sleep(t_philo *philo, long millisecond);
-void	ft_free(t_philo *philo, pthread_t *tid);
-void	ft_print(t_philo *philo, int name_proccess);
+int		ft_free(int *value, t_philo *philo, pthread_t *tid, \
+		pthread_mutex_t *print);
 int		error_message(char *message);
 long	get_time(void);
+void	ft_print(t_philo *philo, int name_proccess);
+void	thread_sleep(t_philo *philo, long millisecond);
 
-void *ft_undertaker(void *thread);
+void	*ft_undertaker(void *thread);
 void	*run_philo(void *thread);
+int		mutex_destroy(t_philo *philo);
 
 #endif
