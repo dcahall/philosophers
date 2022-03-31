@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/29 14:29:40 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/03/31 12:40:14 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ static int	create_threads(t_philo *philo, pthread_t *tid, int *value)
 		if (i >= value[0] && i % 2 == 0)
 			i = 1;
 	}
-	if (pthread_create((tid + value[0]), NULL, ft_undertaker, (void *) philo))
+	if (pthread_create((tid + value[0]), NULL, ft_undertaker, (void *)philo))
 		return (error_message("Error pthread_create"));
 	i = 0;
 	while (i <= value[0])
