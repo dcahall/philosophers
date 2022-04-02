@@ -6,7 +6,7 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:00:19 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/28 12:31:33 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 16:28:39 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static int	check_symbol(int argc, char **argv)
 		while (argv[i][j])
 		{
 			if (!ft_isdigit(argv[i][j]))
-				return (EXIT_FAILURE);
+				return (error_message("Error ft_isdigit"));
 			j++;
 		}
 		j = 0;
@@ -32,6 +32,12 @@ static int	check_symbol(int argc, char **argv)
 	}
 	return (EXIT_SUCCESS);
 }
+
+/*
+** We always allocate memory for 6 cells, even if there are 5 
+** arguments. In cell 6 we note how many philosophers have already eaten. 
+** If there are 4 arguments, then cell 5 remains unused
+*/
 
 static int	*convers_argc_to_int(int argc, char **argv)
 {
@@ -50,7 +56,7 @@ static int	*convers_argc_to_int(int argc, char **argv)
 	while (i < argc - 1)
 	{
 		value[i] = ft_atoi(argv[i + 1]);
-		if (value[i] == 0)
+		if (value[i] <= 0)
 		{
 			error_message("Error arg");
 			free(value);
@@ -60,6 +66,11 @@ static int	*convers_argc_to_int(int argc, char **argv)
 	}
 	return (value);
 }
+
+/*
+** Checks characters for validity.
+** Allocates memory for parameters and writes them
+*/
 
 int	*parse_arg(int argc, char **argv)
 {

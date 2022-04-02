@@ -6,12 +6,12 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/29 14:25:25 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/31 19:27:33 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 16:06:30 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PHILOSOPHERS_H
-# define PHILOSOPHERS_H
+#ifndef PHILOSOPHERS_BONUS_H
+# define PHILOSOPHERS_BONUS_H
 # include "../libft/libft.h"
 # include <stdlib.h>
 # include <stdio.h>
@@ -21,7 +21,7 @@
 # include <fcntl.h>
 # include <sys/stat.h> 
 # include <sys/types.h>
-#include <signal.h>
+# include <signal.h>
 # include <semaphore.h>
 # include <errno.h>
 # define CONTINUE		1
@@ -49,6 +49,7 @@ typedef struct philo
 	sem_t	*print;
 	sem_t	*all_full;
 	sem_t	*stop_run;
+	sem_t	*all_start;
 }	t_philo;
 
 int		*parse_arg(int argc, char **argv);
@@ -60,7 +61,6 @@ long	get_time(void);
 void	ft_print(t_philo *philo, int name_proccess);
 void	thread_sleep(long millisecond);
 
-void	*ft_undertaker(void *thread);
 void	philo_proccess(t_philo *philo, int i);
 
 #endif

@@ -6,25 +6,41 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 14:01:26 by macuser           #+#    #+#             */
-/*   Updated: 2022/03/28 20:27:38 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 16:16:04 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
+
+/*
+** Destroys all mutexes, mutexes must be in the open 
+** state, since the value of the stop_run flag blocks only 
+** printing, all fork mutexes are in the open state, and the 
+** print mutex needs to be opened. Mutexes can, but it is not 
+** desirable to close them in different threads, but they cannot
+** be closed in different processes.
+*/
 
 int	mutex_destroy(t_philo *philo)
 {
 	int	i;
 
 	i = 0;
+	pthread_mutex_unlock(philo->print);
+	if (pthread_mutex_destroy(philo->print))
+		return (error_message("Error pthread_mutex_destroy"));
 	while (i < philo->value[0])
 	{
 		if (pthread_mutex_destroy((philo + i)->right_fork))
-			return (EXIT_FAILURE);
+			return (error_message("Error pthread_mutex_destroy"));
 		i++;
 	}
 	return (EXIT_SUCCESS);
 }
+
+/*
+** Tracks the death of the philosopher and prints the status
+*/
 
 static int	somebody_died(t_philo *philo)
 {
@@ -35,6 +51,14 @@ static int	somebody_died(t_philo *philo)
 	}
 	return (0);
 }
+
+/*
+** The stream that passes through all the philosophers and 
+** checks whether they died or not, if they died changes, 
+** and also looks at how many philosophers are already full. 
+** If everyone is full, the value[1] changes and the philosophers 
+** stop their cycle
+*/
 
 void	*ft_undertaker(void *thread)
 {
@@ -63,6 +87,13 @@ void	*ft_undertaker(void *thread)
 	return (NULL);
 }
 
+/*
+** We block the forks, print the actions, check whether the
+** philosophers should eat any number of times (check 
+** whether the philosopher is full or not), record the start
+** time of the meal, unlock the forks.
+*/
+
 static void	lock_unlock_fork(t_philo *philo, int action)
 {
 	if (action == LOCK)
@@ -70,13 +101,13 @@ static void	lock_unlock_fork(t_philo *philo, int action)
 		pthread_mutex_lock(philo->left_fork);
 		ft_print(philo, FORK);
 		pthread_mutex_lock(philo->right_fork);
+		philo->last_meal = get_time();
 		ft_print(philo, FORK);
 		ft_print(philo, EAT);
 		if (philo->meal_numbers != NOT_EXIST)
 			philo->meal_numbers -= 1;
 		if (philo->meal_numbers == 0)
 			philo->value[ARG6 - 1] += 1;
-		philo->last_meal = get_time();
 	}
 	else if (action == UNLOCK)
 	{	
@@ -84,6 +115,16 @@ static void	lock_unlock_fork(t_philo *philo, int action)
 		pthread_mutex_unlock(philo->right_fork);
 	}	
 }
+
+/*
+** In order for there to be no deadlock for sure, although we first
+** created even and then odd philosophers, let's say that the non-
+** even ones slept a little more while the even ones eat. If the 
+** philosopher is 1, then we do not let him into the loop, because 
+** he will block for 2 forks and will not return control to the main 
+** thread. If the philosopher died or everyone ate, we write a flag in 
+** value[1] that says it's time to close the streams
+*/
 
 void	*run_philo(void *thread)
 {

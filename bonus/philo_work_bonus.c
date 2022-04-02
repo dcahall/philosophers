@@ -6,18 +6,22 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 14:01:26 by macuser           #+#    #+#             */
-/*   Updated: 2022/03/31 19:54:46 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 12:34:19 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers_bonus.h"
+
+/*
+** Checking the death of the philosopher, if he is dead, we
+** return control to the main process
+*/
 
 static void	*somebody_died(void *thread)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)thread;
-	// printf("philo #%d time = %ld\n", philo->num_philo, (get_time() - philo->last_meal));
 	while (1)
 	{
 		if (get_time() - philo->last_meal > philo->value[1])
@@ -29,6 +33,12 @@ static void	*somebody_died(void *thread)
 	}
 	return (NULL);
 }
+
+/*
+** Fork lock and unlock function. We also track how many 
+** times the philosopher has eaten, if he is full, we unlock the 
+** all_full semaphore
+*/
 
 static void	lock_unlock_fork(t_philo *philo, int action)
 {
@@ -52,13 +62,15 @@ static void	lock_unlock_fork(t_philo *philo, int action)
 	}	
 }
 
-void	philo_proccess(t_philo *philo, int i)
+/*
+** We also create an unlink stream in order not to wait for it
+** and philosophers began to eat think and sleep
+*/
+
+static void	check_death_thread(t_philo *philo)
 {
 	pthread_t	tid;
 
-	philo->num_philo = i + 1;
-	philo->time_start = get_time();
-	philo->last_meal = philo->time_start;
 	if (pthread_create(&tid, NULL, somebody_died, (void *)philo))
 	{
 		error_message("Error pthread_create(philo_proccess)");
@@ -71,9 +83,27 @@ void	philo_proccess(t_philo *philo, int i)
 		sem_post(philo->stop_run);
 		exit(1);
 	}
+}
+
+/*
+** A thread is being created to track the philosopher's death.
+** Until all the philosophers are created, the rest will wait for 
+** them on the all_start semaphore. In order to avoid 
+** deadlock, we create a launch sequence, for this even-
+** numbered ones sleep half of the time that odd ones eat.
+** Philosophers begin to eat sleep and think.
+*/
+
+void	philo_proccess(t_philo *philo, int i)
+{
+	check_death_thread(philo);
+	philo->num_philo = i + 1;
+	sem_wait(philo->all_start);
+	philo->time_start = get_time();
+	philo->last_meal = philo->time_start;
 	if (philo->num_philo % 2 == 0)
 		thread_sleep((long)(philo->value[2] / 2));
-	while (philo->value[0] != 1)
+	while (1)
 	{
 		lock_unlock_fork(philo, LOCK);
 		thread_sleep(philo->value[2]);

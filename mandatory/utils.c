@@ -6,11 +6,15 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 19:44:56 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/30 13:41:27 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 16:14:45 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
+
+/* 
+** The function returns the current time in milliseconds.
+*/
 
 long	get_time(void)
 {
@@ -20,6 +24,10 @@ long	get_time(void)
 	return (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
 }
 
+/*
+** Functions responsible for sleep thread
+*/
+
 void	thread_sleep(t_philo *philo, long millisecond)
 {
 	long	time;
@@ -28,6 +36,14 @@ void	thread_sleep(t_philo *philo, long millisecond)
 	while (time > get_time() && philo->value[1] != STOP_RUN)
 		usleep(300);
 }
+
+/*
+** The output function, the mutex is needed so that the 
+** output is not mixed. If the philosopher has died, then he 
+** raises the flag stored in philo->value[1] and informs 
+** others about it. This avoids any output to the console
+** after the philosopher's death.
+*/
 
 void	ft_print(t_philo *philo, int name_proccess)
 {
@@ -56,6 +72,11 @@ void	ft_print(t_philo *philo, int name_proccess)
 	}
 	pthread_mutex_unlock(philo->print);
 }
+
+/*
+** The function frees up all allocated memory under the 
+** philosopher (input parameters, mutexes, thread IDs)
+*/
 
 int	ft_free(int *value, t_philo *philo, pthread_t *tid, pthread_mutex_t *print)
 {

@@ -6,11 +6,20 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/31 12:40:14 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 16:02:02 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
+
+/*
+** We allocate memory for philosophers (structures), the 
+** number of structures is equal to the number of 
+** philosophers, initialize the fields of the structure.
+** By the variable meals_numbers, we track whether 
+** philosophers need to eat a certain number of times, if so, 
+** the value of how many times they need to eat is stored there.
+*/
 
 static t_philo	*init_ph(int *value, int argc, pthread_mutex_t *print)
 {
@@ -37,6 +46,13 @@ static t_philo	*init_ph(int *value, int argc, pthread_mutex_t *print)
 	return (philo);
 }
 
+/*
+** We allocate memory for forks, we distribute forks to 
+** philosophers. Each philosopher has 2 forks, the right 
+** fork belongs to the current philosopher, and the left fork 
+** belongs to the neighbor. Initializing mutexes
+*/
+
 static int	set_forks(t_philo *philo, int value)
 {
 	pthread_mutex_t	*forks;
@@ -60,6 +76,14 @@ static int	set_forks(t_philo *philo, int value)
 	}
 	return (EXIT_SUCCESS);
 }
+
+/*
+** Creates streams of even philosophers first, then odd 
+** ones, also creates an undertaker stream that tracks the 
+** death of philosophers and the number of dinners. We 
+** are waiting for all the philosopher and undertaker using 
+** the pthread_join function
+*/
 
 static int	create_threads(t_philo *philo, pthread_t *tid, int *value)
 {
@@ -86,6 +110,14 @@ static int	create_threads(t_philo *philo, pthread_t *tid, int *value)
 	return (EXIT_SUCCESS);
 }
 
+/*
+** Allocates memory for thread identifiers (we create 1 more, one
+** thread will monitor whether any of the philosophers have died). 
+** We are sending philosophers to launch. When the philosophers 
+** have worked out, we destroy mutexes (only an open mutex can 
+** be destroyed) and clear the memory
+*/
+
 static int	start_philo(t_philo *philo, int *value)
 {
 	pthread_t	*tid;
@@ -100,6 +132,10 @@ static int	start_philo(t_philo *philo, int *value)
 	ft_free(value, philo, tid, philo->print);
 	return (EXIT_SUCCESS);
 }
+
+/*
+** Initializes the mutex, creates the structure, initializes the structure
+*/
 
 int	ft_init(int *value, int argc)
 {

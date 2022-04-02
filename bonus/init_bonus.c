@@ -6,11 +6,17 @@
 /*   By: dcahall <dcahall@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/13 15:21:53 by dcahall           #+#    #+#             */
-/*   Updated: 2022/03/31 19:55:03 by dcahall          ###   ########.fr       */
+/*   Updated: 2022/04/02 15:57:42 by dcahall          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers_bonus.h"
+
+/*
+** Forks semaphore shows the number of forks available.
+** Print semaphore allows only one of the philosophers to print.
+** Stop_run semaphore is responsible for program termination
+*/
 
 static int	init_sem(t_philo *philo, int *value)
 {
@@ -18,15 +24,27 @@ static int	init_sem(t_philo *philo, int *value)
 	sem_unlink("/all_full");
 	sem_unlink("/print");
 	sem_unlink("/stop_run");
+	sem_unlink("/all_start");
 	philo->forks = sem_open("/forks", O_CREAT | O_EXCL, 0666, value[0]);
 	philo->print = sem_open("/print", O_CREAT | O_EXCL, 0666, 1);
 	philo->all_full = sem_open("/all_full", O_CREAT | O_EXCL, 0666, 0);
 	philo->stop_run = sem_open("/stop_run", O_CREAT | O_EXCL, 0666, 0);
+	philo->all_start = sem_open("/all_start", O_CREAT | O_EXCL, 0666, 0);
 	if (philo->forks == SEM_FAILED || philo->print == SEM_FAILED
-		|| philo->all_full == SEM_FAILED || philo->stop_run == SEM_FAILED)
+		|| philo->all_full == SEM_FAILED || philo->stop_run == SEM_FAILED
+		|| philo->all_start == SEM_FAILED)
 		return (error_message("Error sem_open"));
 	return (EXIT_SUCCESS);
 }
+
+/*
+** We create only one structure for the philosopher,
+** since when creating processes, the general data is copied. 
+** Initializing the structure. By the variable meals_numbers, 
+** we track whether philosophers need to eat a certain 
+** number of times, if so, the value of how many times they need
+** to eat is stored there.
+*/
 
 static t_philo	*init_ph(int *value, int argc)
 {
@@ -48,18 +66,16 @@ static t_philo	*init_ph(int *value, int argc)
 	return (philo);
 }
 
-/*	непонятно с какими семафорами работать 
-** 	1. просто разблокируем семафор stop_run,
-** 	и основной процесс начинает всех убивать
-**
-**  2. Cначала заблокировать семафор на печать
-**	а потом только разблокировать stop_run
-**	но в этом случае придется лишнего постоять
-**	на блокировке семафора печати
+/* 
+** The function counts the number of well-fed philosophers,
+** the all_full semaphore is equal to the number of philosophers.
+** Next, we block the print semaphore, and continue the main process 
+** by opening the stop_run semaphore
 */
-static void *meals_counter(void *thread)
+
+static void	*meals_counter(void *thread)
 {
-	t_philo *philo;
+	t_philo	*philo;
 	int		i;
 
 	i = 0;
@@ -74,12 +90,14 @@ static void *meals_counter(void *thread)
 	return (NULL);
 }
 
-
-
-/* Создаем отвязанный поток, который следит за количеством сытых
-** философов. Затем создаем процессы философы. Чтобы главный процесс
-** не завершился блокируем его на stop run.
+/* 
+** I create one unlink stream, it monitors the number of well-fed philosophers.
+** I create processes-philosophers. The all_start semaphore is needed in order 
+** to start processes at the same time (fork takes a long time).
+** The main process is blocked on the stop_run semaphore, 
+** when someone dies or everyone is fed up, the main process unlocks.
 */
+
 static int	create_process(t_philo *philo, pid_t *pid, int *value)
 {
 	pthread_t	tid;
@@ -95,15 +113,26 @@ static int	create_process(t_philo *philo, pid_t *pid, int *value)
 		pid[i] = fork();
 		if (pid[i] == -1)
 			error_message("Error fork");
-		else if (pid[i] == 0)
+		else if (pid[i] == CHILD_PROCCESS)
 			philo_proccess(philo, i);
-		i++;
+		i += 2;
+		if (i >= value[0] && i % 2 == 0)
+			i = 1;
 	}
+	i = 0;
+	while (i++ < value[0])
+		sem_post(philo->all_start);
 	sem_wait(philo->stop_run);
-	printf("GG WP\n");
 	ft_free(value, philo, pid);
 	return (EXIT_SUCCESS);
 }
+
+/*
+** The function initializes philosophers and starts processes. 
+** I remember process IDs in order to kill them later.
+** I kill them the way I don't expect them and they work 
+** until the lock on the semaphore
+*/
 
 int	ft_init(int *value, int argc)
 {
