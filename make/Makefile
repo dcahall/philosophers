@@ -1,14 +1,14 @@
-NAME			=	philo
+BONUS_NAME		=	philo_bonus
 
-BONUS			=	bonus
+MANDATORY_NAME	=	philo
 
-LIBFT_PATH		=	libft/
+LIBFT_PATH		=	../libft/
 
-SRCS_PATH		=	mandatory/
+SRCS_PATH		=	../philo/
 
-BONUS_PATH		=	bonus/
+BONUS_PATH		=	../philo_bonus/
 
-HEADER_PATH		=	includes/
+HEADER_PATH		=	../includes/
 
 LIBFT			=	libft.a
 
@@ -36,19 +36,28 @@ CFLAGS			=	-Wall -Wextra -Werror $(INCLUDES)
 
 RM				=	rm -f
 
+ifdef BONUS
+		OBJECTS = $(B_OBJS)
+else
+		OBJECTS = $(OBJS)
+endif
+
+ifdef NAME_DEFINE
+		NAME 	= $(BONUS_NAME)
+else
+		NAME	= $(MANDATORY_NAME)
+endif
+
 .PHONY		:	all clean fclean re bonus
 
 all			:	$(NAME)
 	
-$(NAME)		:	$(OBJS) $(HEADER)
+$(NAME)		:	$(OBJECTS) $(HEADER)
 	$(MAKE) -C $(LIBFT_PATH)
-	$(CC) $(CFLAGS) -L$(LIBFT_PATH) -lft $(SRCS) -o $(NAME)
+	$(CC) $(CFLAGS) -L$(LIBFT_PATH) -lft $(OBJECTS) -o $(NAME)
 
-bonus		:	$(BONUS)
-
-$(BONUS)	:	$(B_OBJS) $(HEADER)
-	$(MAKE) -C $(LIBFT_PATH)
-	$(CC) $(CFLAGS) -L$(LIBFT_PATH) -lft $(B_SRCS) -o $(NAME)	
+bonus		:
+	@make BONUS=1 NAME_DEFINE=2 all
 
 %.o			:	%.c $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -59,6 +68,6 @@ clean		:
 
 fclean		:	clean
 	$(MAKE) fclean -C $(LIBFT_PATH)
-	$(RM) $(NAME) 
+	$(RM) $(MANDATORY_NAME) $(BONUS_NAME) 
 
 re			:	fclean all
