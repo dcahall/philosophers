@@ -29,7 +29,7 @@ ___
 ./philo 0   210 200 100		    	# exit with error
 ./philo 2   210 100 -1		    	# exit with error
 ./philo	2   210 100 100		     	# should live
-./philo 2   210 100 100 2 	   	 	# everyone should eat at least 2 times
+./philo 2   210 100 100 2			# everyone should eat at least 2 times
 ./philo 2   199 100 100		     	# should die
 ./philo 2   200 101 100	      	 	# should die
 ./philo	3   310 100 100		     	# should live
@@ -45,13 +45,13 @@ ___
 ./philo_bonus 0   200 200 100		# exit with error
 ./philo_bonus 2   200 100 -1		# exit with error
 ./philo_bonus 2   210 100 100		# should live
-./philo_bonus 2   210 100 100 2	    # everyone should eat at least 2 times
+./philo_bonus 2   210 100 100 2		# everyone should eat at least 2 times
 ./philo_bonus 2   199 100 100		# should die
 ./philo_bonus 2   200 101 100		# should die
 ./philo_bonus 3   310 100 100		# should live
 ./philo_bonus 3   299 100 100		# should die
 ./philo_bonus 5   800 200 200		# should live
-./philo_bonus 5   800 200 200 7	    # everyone should eat at least 7 times
+./philo_bonus 5   800 200 200 7		# everyone should eat at least 7 times
 ./philo_bonus 100 410 200 200		# should live
 ./philo_bonus 99  610 200 200		# should live
 ```
