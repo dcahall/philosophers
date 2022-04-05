@@ -57,7 +57,7 @@ ___
 ```
 **Useful links:**
 
-1. [A detailed series of videos about streams, semaphores, mutexes](https://www.youtube.com/watch?v=d9s_d28yJq0&list=PLfqABt5AS4FmuQf70psXrsMLEDQXNkLq2)
+1. [A detailed series of videos about threads, semaphores, mutexes](https://www.youtube.com/watch?v=d9s_d28yJq0&list=PLfqABt5AS4FmuQf70psXrsMLEDQXNkLq2)
 2. [A good theoretical part about threads](http://www.csc.villanova.edu/~mdamian/threads/posixthreads.html)
 3. [What are the differences between process and thread?](https://www.geeksforgeeks.org/multithreading-c-2/)
 4. [POSIX Threads Programming](https://hpc-tutorials.llnl.gov/posix/) 
